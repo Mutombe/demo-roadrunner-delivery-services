@@ -3,12 +3,13 @@ import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform, useInView, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight, ArrowDown, MapPin, Phone, WhatsappLogo, Star, Quotes,
-  CaretLeft, CaretRight, CheckCircle, Buildings, Lightbulb, Rocket, ShieldCheck, Target,
+  CaretLeft, CaretRight, CheckCircle, Rocket, ShieldCheck, Target,
+  Buildings, Lightbulb, Package,
 } from '@phosphor-icons/react';
 import PageTransition from '../components/PageTransition';
 import siteData from '../data/siteData';
 
-const iconMap = { Buildings, Lightbulb, Rocket, ShieldCheck, Star, Target, Star };
+const iconMap = { Buildings, Lightbulb, Rocket, ShieldCheck, Star, Target };
 
 function AnimatedCounter({ target, suffix = '', duration = 2.5 }) {
   const [count, setCount] = useState(0);
@@ -39,140 +40,182 @@ function NoiseTexture({ opacity = 0.035 }) {
   );
 }
 
-function GoldSparkles() {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-[5]">
-      {[...Array(20)].map((_, i) => (
-        <div key={i} className="absolute" style={{
-          width: `${Math.random() * 3 + 1}px`, height: `${Math.random() * 3 + 1}px`,
-          background: `radial-gradient(circle, rgba(212,168,83,${Math.random() * 0.6 + 0.2}) 0%, transparent 70%)`,
-          left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`,
-          animation: `sparkle-float ${Math.random() * 8 + 6}s ease-in-out infinite`,
-          animationDelay: `${Math.random() * 5}s`,
-        }} />
-      ))}
-    </div>
-  );
-}
 
+/* ================================================================
+   1. HERO — Clean white split with blue accent
+   ================================================================ */
 function HeroSection() {
   const { business, hero } = siteData;
   const containerRef = useRef(null);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const heroImages = hero.backgroundImages.map(img => img.url);
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ['start start', 'end start'] });
-  const bgY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
-  const textY = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  useEffect(() => { const timer = setInterval(() => setCurrentSlide(p => (p + 1) % heroImages.length), 6000); return () => clearInterval(timer); }, [heroImages.length]);
+  const textY = useTransform(scrollYProgress, [0, 1], ['0%', '25%']);
+  const imgScale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
 
   return (
-    <section ref={containerRef} className="relative h-screen min-h-[700px] overflow-hidden bg-navy-950">
-      <motion.div className="absolute inset-0" style={{ y: bgY }}>
-        <AnimatePresence mode="sync">
-          <motion.img key={currentSlide} src={heroImages[currentSlide]} alt={hero.backgroundImages[currentSlide]?.alt}
-            className="absolute inset-0 w-full h-[130%] object-cover object-center"
-            initial={{ opacity: 0, scale: 1.08 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-            transition={{ duration: 2, ease: 'easeInOut' }} loading="eager" />
-        </AnimatePresence>
-        <div className="absolute inset-0 bg-gradient-to-b from-navy-950/80 via-navy-950/50 to-navy-950/90 z-[1]" />
-        <div className="absolute inset-0 bg-gradient-to-r from-navy-950/70 via-transparent to-navy-950/30 z-[1]" />
-      </motion.div>
-      <GoldSparkles />
-      <div className="absolute right-5 sm:right-8 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-3">
-        {heroImages.map((_, i) => (<button key={i} onClick={() => setCurrentSlide(i)} className={`w-[3px] transition-all duration-700 ${i === currentSlide ? 'h-10 bg-gold-500' : 'h-4 bg-white/20 hover:bg-white/40'}`} aria-label={`Slide ${i + 1}`} />))}
+    <section ref={containerRef} className="relative min-h-screen bg-white overflow-hidden">
+      <NoiseTexture opacity={0.02} />
+      <div className="relative z-20 max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 pt-36 pb-20">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center min-h-[70vh]">
+          <motion.div style={{ y: textY }}>
+            <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.8, delay: 0.2 }}
+              className="w-16 h-[3px] bg-blue-600 mb-6 origin-left" />
+            <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}
+              className="text-blue-600 text-xs sm:text-sm font-semibold uppercase tracking-[0.3em] mb-6" style={{ fontFamily: 'var(--font-sans)' }}>
+              {hero.badge}
+            </motion.p>
+            <div className="overflow-hidden">
+              {['ROADRUNNER', 'DELIVERY.'].map((line, i) => (
+                <motion.div key={line} initial={{ y: '110%' }} animate={{ y: 0 }}
+                  transition={{ duration: 1, delay: 0.5 + i * 0.2, ease: [0.16, 1, 0.3, 1] }}>
+                  <h1 className={`font-heading leading-[0.88] tracking-tight ${
+                    i === 0 ? 'text-navy-900' : 'text-blue-600'
+                  }`} style={{ fontSize: 'clamp(2.2rem, 7vw, 4.5rem)', fontWeight: i === 0 ? 700 : 300 }}>
+                    {line}
+                  </h1>
+                </motion.div>
+              ))}
+            </div>
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
+              className="text-navy-700/60 text-sm sm:text-base mt-6 max-w-md leading-relaxed" style={{ fontFamily: 'var(--font-sans)' }}>
+              {hero.subtitle || business.description}
+            </motion.p>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }} className="flex items-center gap-3 mt-6">
+              <div className="flex items-center gap-0.5">
+                {[...Array(Math.round(business.rating))].map((_, i) => <Star key={i} size={14} weight="fill" className="text-blue-600" />)}
+              </div>
+              <span className="text-navy-700/40 text-xs uppercase tracking-wider" style={{ fontFamily: 'var(--font-sans)' }}>
+                {business.rating} / 5 &middot; {business.reviewCount} Reviews
+              </span>
+            </motion.div>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 1.4 }} className="flex flex-wrap gap-4 mt-10">
+              <Link to="/contact" className="group inline-flex items-center gap-3 bg-blue-600 text-white px-8 py-4 text-sm uppercase tracking-[0.15em] font-semibold transition-all duration-500 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-600/20" style={{ fontFamily: 'var(--font-sans)' }}>
+                {hero.ctaPrimary} <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+              </Link>
+              <Link to="/services" className="group inline-flex items-center gap-3 border-2 border-navy-900/10 text-navy-900 px-8 py-4 text-sm uppercase tracking-[0.15em] font-semibold transition-all duration-500 hover:border-blue-600 hover:text-blue-600" style={{ fontFamily: 'var(--font-sans)' }}>
+                {hero.ctaSecondary}
+              </Link>
+            </motion.div>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1, delay: 0.5 }} className="relative">
+            <motion.div style={{ scale: imgScale }} className="overflow-hidden">
+              <img src={hero.backgroundImages[0]?.url} alt={hero.backgroundImages[0]?.alt} className="w-full aspect-[4/5] object-cover object-center" loading="eager" />
+            </motion.div>
+            <div className="absolute -top-3 -left-3 w-20 h-20 border-t-2 border-l-2 border-blue-600/30" />
+            <div className="absolute -bottom-3 -right-3 w-20 h-20 border-b-2 border-r-2 border-blue-600/30" />
+            <div className="absolute -bottom-6 -left-6 bg-blue-600 text-white p-5 sm:p-6 shadow-2xl">
+              <div className="text-center">
+                <div className="font-heading text-2xl sm:text-3xl leading-none font-bold">{business.projectsCompleted || '500+'}</div>
+                <div className="text-white/70 text-[10px] uppercase tracking-[0.15em] mt-1" style={{ fontFamily: 'var(--font-sans)' }}>Deliveries</div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </div>
-      <NoiseTexture opacity={0.03} />
-      <div className="absolute top-[15%] left-0 w-[2px] h-32 sm:h-48 bg-gradient-to-b from-transparent via-gold-500 to-transparent z-20" />
-      <motion.div className="relative z-20 flex flex-col justify-center h-full max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 pt-36" style={{ y: textY, opacity }}>
-        <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 1, delay: 0.3 }} className="w-16 h-[2px] bg-gradient-to-r from-gold-500 to-gold-400/50 mb-6 origin-left" />
-        <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.4 }}
-          className="text-gold-400 text-xs sm:text-sm font-semibold uppercase tracking-[0.3em] mb-8" style={{ fontFamily: 'var(--font-sans)' }}>{hero.badge}</motion.p>
-        <div className="overflow-hidden">
-          {["MOVING", "ZIMBABWE", "FORWARD."].map((line, i) => (
-            <motion.div key={line} initial={{ y: '110%' }} animate={{ y: 0 }} transition={{ duration: 1, delay: 0.5 + i * 0.15, ease: [0.16, 1, 0.3, 1] }}>
-              <h1 className={`font-heading leading-[0.92] tracking-tight ${line === "ZIMBABWE" ? 'bg-gradient-to-r from-gold-500 via-gold-400 to-gold-600 bg-clip-text text-transparent italic' : 'text-white'}`}
-                style={{ fontSize: 'clamp(2.2rem, 7vw, 4.5rem)', fontWeight: line === "ZIMBABWE" ? 700 : 300 }}>{line}</h1>
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2 }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2">
+        <span className="text-navy-900/20 text-[10px] uppercase tracking-[0.3em]" style={{ fontFamily: 'var(--font-sans)' }}>Scroll</span>
+        <motion.div animate={{ y: [0, 8, 0] }} transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}>
+          <ArrowDown size={14} className="text-blue-600/40" />
+        </motion.div>
+      </motion.div>
+    </section>
+  );
+}
+
+
+/* ================================================================
+   2. PROCESS — Book > Track > Deliver
+   ================================================================ */
+function ProcessSteps() {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '-80px' });
+  const steps = [
+    { num: '01', title: 'Book', desc: 'Request a pickup online or via WhatsApp. We confirm within 30 minutes.', icon: Package },
+    { num: '02', title: 'Track', desc: 'Follow your shipment in real-time with our GPS tracking system.', icon: Target },
+    { num: '03', title: 'Deliver', desc: 'Your parcel arrives safely and on time. Every time.', icon: CheckCircle },
+  ];
+  return (
+    <section ref={ref} className="bg-earth-50 py-24 sm:py-32 lg:py-40">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8 }} className="text-center mb-16 sm:mb-20">
+          <div className="w-12 h-[3px] bg-blue-600 mx-auto mb-6" />
+          <p className="text-blue-600/60 text-xs uppercase tracking-[0.3em] mb-3" style={{ fontFamily: 'var(--font-sans)' }}>How It Works</p>
+          <h2 className="font-heading text-navy-900 leading-[0.92]" style={{ fontSize: 'clamp(2rem, 4.5vw, 3.5rem)' }}>
+            Three Simple <span className="text-blue-600">Steps</span>
+          </h2>
+        </motion.div>
+        <div className="grid md:grid-cols-3 gap-8 relative">
+          <div className="hidden md:block absolute top-16 left-[16%] right-[16%] h-[2px] bg-gradient-to-r from-blue-600/20 via-blue-600/40 to-blue-600/20 z-0" />
+          {steps.map((step, i) => (
+            <motion.div key={step.title} initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.7, delay: 0.15 * i }} className="relative z-10 text-center">
+              <div className="w-16 h-16 bg-blue-600 text-white flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-600/20">
+                <step.icon size={28} weight="fill" />
+              </div>
+              <div className="text-blue-600/20 font-heading text-4xl font-bold mb-2">{step.num}</div>
+              <h3 className="font-heading text-navy-900 text-2xl mb-3">{step.title}</h3>
+              <p className="text-navy-700/50 text-sm leading-relaxed max-w-xs mx-auto" style={{ fontFamily: 'var(--font-sans)' }}>{step.desc}</p>
             </motion.div>
           ))}
         </div>
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 1.2 }} className="flex items-center gap-3 mt-8">
-          <div className="w-8 h-[1px] bg-gold-500/40" />
-          <p className="text-white/30 text-xs sm:text-sm uppercase tracking-[0.2em]" style={{ fontFamily: 'var(--font-sans)' }}>1,000+ Deliveries \u00b7 Perfect Rating \u00b7 Est. 2019</p>
-        </motion.div>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 1.4 }} className="flex flex-wrap gap-4 mt-10">
-          <Link to="/contact" className="group relative inline-flex items-center gap-3 bg-gold-500 text-navy-950 px-8 py-4 text-sm uppercase tracking-[0.15em] font-semibold transition-all duration-500 hover:bg-gold-400 hover:shadow-xl hover:shadow-gold-500/20" style={{ fontFamily: 'var(--font-sans)' }}>
-            {hero.ctaPrimary} <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-          </Link>
-          <Link to="/projects" className="group inline-flex items-center gap-3 border border-white/20 text-white px-8 py-4 text-sm uppercase tracking-[0.15em] font-semibold transition-all duration-500 hover:border-gold-500/50 hover:text-gold-400 hover:bg-white/5" style={{ fontFamily: 'var(--font-sans)' }}>
-            {hero.ctaSecondary}
-          </Link>
-        </motion.div>
-      </motion.div>
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.5 }} className="absolute bottom-8 sm:bottom-12 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2">
-        <span className="text-white/20 text-[10px] uppercase tracking-[0.3em]" style={{ fontFamily: 'var(--font-sans)' }}>Scroll</span>
-        <motion.div animate={{ y: [0, 8, 0] }} transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}><ArrowDown size={14} className="text-gold-500/40" /></motion.div>
-      </motion.div>
-      <div className="hidden lg:flex absolute right-8 bottom-12 z-20">
-        <span className="text-white/10 text-[10px] uppercase tracking-[0.4em]" style={{ writingMode: 'vertical-rl', fontFamily: 'var(--font-sans)' }}>Legit Carriers &mdash; Harare, Zimbabwe</span>
       </div>
     </section>
   );
 }
 
-function MarqueeTicker() {
-  const items = ["FREIGHT", "HAULAGE", "WAREHOUSING", "DISTRIBUTION", "CUSTOMS CLEARANCE", "CROSS-BORDER", "EXPRESS DELIVERY", "FLEET MANAGEMENT"];
-  const repeated = [...items, ...items, ...items, ...items];
-  return (
-    <section className="bg-navy-950 border-y border-gold-500/10 py-5 sm:py-6 overflow-hidden">
-      <div className="animate-marquee flex whitespace-nowrap">
-        {repeated.map((item, i) => (<span key={i} className="flex items-center gap-6 sm:gap-8 mx-6 sm:mx-8"><span className="text-gold-500/80 font-heading text-lg sm:text-2xl italic tracking-wider">{item}</span><span className="text-gold-500/20 text-sm">&diams;</span></span>))}
-      </div>
-    </section>
-  );
-}
 
+/* ================================================================
+   3. SERVICES — White bg, blue accent
+   ================================================================ */
 function ServicesGrid() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const { servicesPreview, services } = siteData;
-  const serviceImages = [
-    "https://images.unsplash.com/photo-1570480548578-3d49ca005e67?w=800&q=80",
-    "https://images.unsplash.com/photo-1494412574643-ff11b0a5eb95?w=800&q=80",
-    "https://images.unsplash.com/photo-1570480548578-3d49ca005e67?w=800&q=80",
-    "https://images.unsplash.com/photo-1494412574643-ff11b0a5eb95?w=800&q=80",
-    "https://images.unsplash.com/photo-1570480548578-3d49ca005e67?w=800&q=80",
-    "https://images.unsplash.com/photo-1494412574643-ff11b0a5eb95?w=800&q=80"
+  const imgs = [
+    'https://images.unsplash.com/photo-1570480548578-3d49ca005e67?w=800&q=80',
+    'https://images.unsplash.com/photo-1494412574643-ff11b0a5eb95?w=800&q=80',
+    'https://images.unsplash.com/photo-1558904541-efa843a96f01?w=800&q=80',
+    'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&q=80',
+    'https://images.unsplash.com/photo-1570480548578-3d49ca005e67?w=800&q=80',
+    'https://images.unsplash.com/photo-1494412574643-ff11b0a5eb95?w=800&q=80',
   ];
   return (
-    <section ref={ref} className="bg-navy-900 py-24 sm:py-32 lg:py-40">
+    <section ref={ref} className="bg-white py-24 sm:py-32 lg:py-40">
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8 }} className="mb-14 sm:mb-20">
-          <div className="w-12 h-[2px] bg-gold-500 mb-6" />
+          <div className="w-12 h-[3px] bg-blue-600 mb-6" />
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
             <div>
-              <p className="text-gold-500/60 text-xs uppercase tracking-[0.3em] mb-3" style={{ fontFamily: 'var(--font-sans)' }}>Our Expertise</p>
-              <h2 className="font-heading text-white leading-[0.92] italic" style={{ fontSize: 'clamp(2rem, 4.5vw, 3.5rem)' }}>What We <span className="text-gold-500">Offer</span></h2>
+              <p className="text-blue-600/60 text-xs uppercase tracking-[0.3em] mb-3" style={{ fontFamily: 'var(--font-sans)' }}>Our Services</p>
+              <h2 className="font-heading text-navy-900 leading-[0.92]" style={{ fontSize: 'clamp(2rem, 4.5vw, 3.5rem)' }}>
+                What We <span className="text-blue-600">Deliver</span>
+              </h2>
             </div>
-            <Link to="/services" className="group text-white/30 text-xs uppercase tracking-[0.2em] flex items-center gap-2 hover:text-gold-500 transition-colors" style={{ fontFamily: 'var(--font-sans)' }}>All Services <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" /></Link>
+            <Link to="/services" className="group text-navy-900/30 text-xs uppercase tracking-[0.2em] flex items-center gap-2 hover:text-blue-600 transition-colors" style={{ fontFamily: 'var(--font-sans)' }}>
+              All Services <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+            </Link>
           </div>
         </motion.div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {servicesPreview.map((service, i) => {
             const IconComp = iconMap[service.icon] || Star;
             return (
-              <motion.div key={service.title} initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, delay: 0.08 * i }} className={i === 0 ? 'sm:col-span-2 lg:col-span-2' : ''}>
-                <Link to={`/services#${services?.items?.[i]?.slug || ''}`} className={`group relative block overflow-hidden ${i === 0 ? 'aspect-[16/9] sm:aspect-[2/1]' : 'aspect-[3/4]'}`}>
-                  <img src={serviceImages[i]} alt={service.title} className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-1000 group-hover:scale-110" loading="lazy" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/60 to-navy-950/20 opacity-90" />
-                  <div className="absolute top-4 right-5 z-10"><span className="text-gold-500/15 font-heading text-6xl sm:text-7xl italic leading-none">{String(i + 1).padStart(2, '0')}</span></div>
-                  <div className="absolute top-5 left-5 z-10 w-10 h-10 border border-gold-500/30 flex items-center justify-center bg-navy-950/60 backdrop-blur-sm group-hover:bg-gold-500/20 group-hover:border-gold-500/60 transition-all duration-500"><IconComp size={18} weight="light" className="text-gold-500" /></div>
-                  <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 z-10">
-                    <h3 className="font-heading text-white text-xl sm:text-2xl italic tracking-wide mb-2">{service.title}</h3>
-                    <p className="text-white/60 text-sm leading-relaxed" style={{ fontFamily: 'var(--font-sans)' }}>{service.desc}</p>
-                    <div className="flex items-center gap-2 mt-3 text-gold-500 group-hover:translate-x-1 transition-transform duration-300"><span className="text-xs uppercase tracking-[0.2em]" style={{ fontFamily: 'var(--font-sans)' }}>Explore</span><ArrowRight size={14} /></div>
+              <motion.div key={service.title} initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, delay: 0.08 * i }}>
+                <Link to={`/services#${services?.items?.[i]?.slug || ''}`} className="group relative block overflow-hidden aspect-[3/4] bg-earth-50">
+                  <img src={imgs[i] || imgs[0]} alt={service.title} className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-1000 group-hover:scale-110" loading="lazy" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-navy-950/80 via-navy-950/30 to-transparent" />
+                  <div className="absolute top-5 left-5 z-10 w-10 h-10 bg-blue-600 flex items-center justify-center shadow-lg">
+                    <IconComp size={18} weight="fill" className="text-white" />
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-gold-500 to-gold-400 z-10" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 z-10">
+                    <h3 className="font-heading text-white text-xl sm:text-2xl tracking-wide mb-2">{service.title}</h3>
+                    <p className="text-white/70 text-sm leading-relaxed" style={{ fontFamily: 'var(--font-sans)' }}>{service.desc}</p>
+                    <div className="flex items-center gap-2 mt-3 text-blue-400 group-hover:translate-x-1 transition-transform duration-300">
+                      <span className="text-xs uppercase tracking-[0.2em]" style={{ fontFamily: 'var(--font-sans)' }}>Learn More</span>
+                      <ArrowRight size={14} />
+                    </div>
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-blue-600 z-10" />
                 </Link>
               </motion.div>
             );
@@ -183,61 +226,26 @@ function ServicesGrid() {
   );
 }
 
-function PortfolioGallery() {
-  const containerRef = useRef(null);
-  const inView = useInView(containerRef, { once: true, margin: '-80px' });
-  const { projects } = siteData;
-  return (
-    <section ref={containerRef} className="bg-navy-950 py-24 sm:py-32 lg:py-40 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 mb-12 sm:mb-16">
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8 }} className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
-          <div>
-            <div className="w-12 h-[2px] bg-gold-500 mb-6" />
-            <p className="text-gold-500/60 text-xs uppercase tracking-[0.3em] mb-3" style={{ fontFamily: 'var(--font-sans)' }}>Selected Works</p>
-            <h2 className="font-heading text-white leading-[0.92] italic" style={{ fontSize: 'clamp(2.5rem, 6vw, 5rem)' }}>Our <span className="text-gold-500">Portfolio</span></h2>
-          </div>
-          <Link to="/projects" className="group text-white/30 text-xs uppercase tracking-[0.2em] flex items-center gap-2 hover:text-gold-500 transition-colors" style={{ fontFamily: 'var(--font-sans)' }}>View All <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" /></Link>
-        </motion.div>
-      </div>
-      <motion.div initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 1, delay: 0.2 }}>
-        <div className="flex gap-4 sm:gap-5 overflow-x-auto px-5 sm:px-8 lg:px-12 pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-          {projects.items.map((project) => (
-            <div key={project.slug} className="group relative flex-shrink-0 w-[300px] sm:w-[360px] lg:w-[420px] overflow-hidden">
-              <div className="aspect-[3/4] overflow-hidden relative">
-                <img src={project.image} alt={project.title} className="w-full h-full object-cover object-center transition-transform duration-1000 group-hover:scale-110" loading="lazy" />
-                <div className="absolute inset-0 bg-navy-950/0 group-hover:bg-navy-950/40 transition-colors duration-700" />
-                <div className="absolute top-5 left-5 z-10"><span className="bg-gold-500/90 text-navy-950 text-[10px] uppercase tracking-[0.2em] px-3 py-1.5 font-semibold" style={{ fontFamily: 'var(--font-sans)' }}>{project.category}</span></div>
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-navy-950 via-navy-950/80 to-transparent">
-                <h4 className="text-white font-heading text-lg sm:text-xl italic tracking-wide">{project.title}</h4>
-                <p className="text-white/40 text-xs mt-1 uppercase tracking-wider" style={{ fontFamily: 'var(--font-sans)' }}>{project.location}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </motion.div>
-    </section>
-  );
-}
 
+/* ================================================================
+   4. STATS — Blue band
+   ================================================================ */
 function StatsBand() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-50px' });
   const { stats } = siteData;
   return (
-    <section ref={ref} className="relative bg-navy-950 overflow-hidden">
-      <div className="absolute inset-0"><div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-48 h-48 bg-gold-500/5 blur-3xl" /><div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-48 h-48 bg-gold-500/5 blur-3xl" /></div>
-      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-gold-500/40 to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-gold-500/40 to-transparent" />
-      <div className="relative max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 py-20 sm:py-24">
+    <section ref={ref} className="relative bg-blue-600 overflow-hidden">
+      <NoiseTexture opacity={0.04} />
+      <div className="relative z-20 max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 py-20 sm:py-24">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-10 sm:gap-16">
           {stats.map((stat, i) => (
             <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, delay: i * 0.12 }} className="text-center relative">
-              <div className="font-heading text-gold-500 leading-none italic" style={{ fontSize: 'clamp(2.8rem, 6vw, 5rem)', textShadow: '0 0 40px rgba(212,168,83,0.15)' }}>
-                <AnimatedCounter target={stat.number.replace(/[^0-9]/g, '')} suffix={stat.number.replace(/[0-9]/g, '')} duration={2.5} />
+              <div className="font-heading text-white leading-none font-bold" style={{ fontSize: 'clamp(2.8rem, 6vw, 5rem)' }}>
+                <AnimatedCounter target={stat.number.replace(/[^0-9]/g, '')} suffix={stat.number.replace(/[0-9]/g, '')} />
               </div>
-              <div className="text-white/30 text-xs sm:text-sm uppercase tracking-[0.25em] mt-3" style={{ fontFamily: 'var(--font-sans)' }}>{stat.label}</div>
-              {i < stats.length - 1 && <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 h-16 w-[1px] bg-gradient-to-b from-transparent via-gold-500/15 to-transparent" />}
+              <div className="text-white/50 text-xs sm:text-sm uppercase tracking-[0.25em] mt-3" style={{ fontFamily: 'var(--font-sans)' }}>{stat.label}</div>
+              {i < stats.length - 1 && <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 h-16 w-[1px] bg-white/20" />}
             </motion.div>
           ))}
         </div>
@@ -246,37 +254,50 @@ function StatsBand() {
   );
 }
 
+
+/* ================================================================
+   5. ABOUT — Split on white
+   ================================================================ */
 function AboutSection() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-100px' });
+  const { business } = siteData;
   return (
-    <section ref={ref} className="bg-navy-950 py-24 sm:py-32 lg:py-40 overflow-hidden">
+    <section ref={ref} className="bg-white py-24 sm:py-32 lg:py-40 overflow-hidden">
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
           <motion.div initial={{ opacity: 0, x: -40 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.9 }}>
-            <div className="w-12 h-[2px] bg-gold-500 mb-6" />
-            <p className="text-gold-500/60 text-xs uppercase tracking-[0.3em] mb-3" style={{ fontFamily: 'var(--font-sans)' }}>Our Story</p>
-            <h2 className="font-heading text-white leading-[0.95] italic mb-8" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)' }}>The Legit<br /><span className="text-gold-500">Promise</span></h2>
-            <p className="text-white/50 text-sm sm:text-base leading-relaxed mb-6 max-w-lg" style={{ fontFamily: 'var(--font-sans)' }}>Legit Carriers launched in 2019 with a fleet of three trucks and an unwavering commitment to on-time delivery. Today, from our 11th-floor office in Causeway Building, we manage logistics across the SADC region.</p>
-            <p className="text-white/35 text-sm leading-relaxed max-w-lg" style={{ fontFamily: 'var(--font-sans)' }}>Over 1,000 deliveries with a perfect 5.0 Google rating proves our promise: your cargo, on time, every time.</p>
-            <div className="w-full h-px bg-white/5 my-8" />
+            <div className="w-12 h-[3px] bg-blue-600 mb-6" />
+            <p className="text-blue-600/60 text-xs uppercase tracking-[0.3em] mb-3" style={{ fontFamily: 'var(--font-sans)' }}>About Us</p>
+            <h2 className="font-heading text-navy-900 leading-[0.95] mb-8" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)' }}>
+              Born to<br /><span className="text-blue-600">Run</span>
+            </h2>
+            <p className="text-navy-700/50 text-sm sm:text-base leading-relaxed mb-6 max-w-lg" style={{ fontFamily: 'var(--font-sans)' }}>
+              Roadrunner Services brings the heat to Harare's delivery scene. We believe every parcel deserves VIP treatment — from a single envelope to a pallet of goods. Our network covers every corner of Harare and extends to all major Zimbabwean cities.
+            </p>
+            <p className="text-navy-700/35 text-sm leading-relaxed max-w-lg" style={{ fontFamily: 'var(--font-sans)' }}>
+              Our motorbike fleet weaves through Harare traffic to deliver your package in record time. For larger shipments, our van fleet handles everything from furniture to industrial equipment with Roadrunner speed.
+            </p>
+            <div className="w-full h-px bg-navy-900/5 my-8" />
             <div className="flex gap-10 sm:gap-16">
-              <div><div className="text-gold-500 font-heading text-3xl sm:text-4xl italic leading-none">2019</div><div className="text-white/30 text-[10px] uppercase tracking-[0.2em] mt-2" style={{ fontFamily: 'var(--font-sans)' }}>Founded</div></div>
-              <div><div className="text-gold-500 font-heading text-3xl sm:text-4xl italic leading-none">1000+</div><div className="text-white/30 text-[10px] uppercase tracking-[0.2em] mt-2" style={{ fontFamily: 'var(--font-sans)' }}>Deliveries</div></div>
-              <div><div className="text-gold-500 font-heading text-3xl sm:text-4xl italic leading-none">5.0</div><div className="text-white/30 text-[10px] uppercase tracking-[0.2em] mt-2" style={{ fontFamily: 'var(--font-sans)' }}>Rating</div></div>
+              <div>
+                <div className="text-blue-600 font-heading text-3xl sm:text-4xl leading-none font-bold">{business.established || '2018'}</div>
+                <div className="text-navy-900/30 text-[10px] uppercase tracking-[0.2em] mt-2" style={{ fontFamily: 'var(--font-sans)' }}>Founded</div>
+              </div>
+              <div>
+                <div className="text-blue-600 font-heading text-3xl sm:text-4xl leading-none font-bold">{business.projectsCompleted || '500+'}</div>
+                <div className="text-navy-900/30 text-[10px] uppercase tracking-[0.2em] mt-2" style={{ fontFamily: 'var(--font-sans)' }}>Deliveries</div>
+              </div>
+              <div>
+                <div className="text-blue-600 font-heading text-3xl sm:text-4xl leading-none font-bold">{business.rating}</div>
+                <div className="text-navy-900/30 text-[10px] uppercase tracking-[0.2em] mt-2" style={{ fontFamily: 'var(--font-sans)' }}>Rating</div>
+              </div>
             </div>
           </motion.div>
           <motion.div initial={{ opacity: 0, x: 40 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.9, delay: 0.2 }} className="relative">
-            <div className="relative">
-              <div className="overflow-hidden"><img src="https://images.unsplash.com/photo-1570480548578-3d49ca005e67?w=800&q=80" alt="Legit Carriers" className="w-full aspect-[4/5] object-cover object-center" loading="lazy" /></div>
-              <div className="absolute -bottom-8 -left-6 sm:-left-10 w-[45%] overflow-hidden border-4 border-navy-950 shadow-2xl">
-                <img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5eb95?w=600&q=80" alt="Legit Carriers detail" className="w-full aspect-square object-cover object-center" loading="lazy" />
-              </div>
-              <div className="absolute -top-4 -right-4 sm:-right-6 bg-gold-500 text-navy-950 p-5 sm:p-7 shadow-2xl">
-                <div className="text-center"><div className="font-heading text-xs uppercase tracking-[0.2em] leading-none" style={{ fontFamily: 'var(--font-sans)' }}>Est.</div><div className="font-heading text-3xl sm:text-4xl italic leading-none mt-1">2019</div></div>
-              </div>
-              <div className="absolute -top-3 -left-3 w-16 h-16 border-t-2 border-l-2 border-gold-500/30" />
-            </div>
+            <img src="https://images.unsplash.com/photo-1570480548578-3d49ca005e67?w=800&q=80" alt="Our operations" className="w-full aspect-[4/5] object-cover object-center" loading="lazy" />
+            <div className="absolute -top-3 -left-3 w-16 h-16 border-t-2 border-l-2 border-blue-600/30" />
+            <div className="absolute -bottom-3 -right-3 w-16 h-16 border-b-2 border-r-2 border-blue-600/30" />
           </motion.div>
         </div>
       </div>
@@ -284,50 +305,60 @@ function AboutSection() {
   );
 }
 
+
+/* ================================================================
+   6. WHY US — Blue checks on light bg
+   ================================================================ */
 function WhyChooseUs() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const points = [
-    { title: "Perfect Track Record", desc: "5.0 Google rating and 99% on-time delivery rate." },
-    { title: "GPS Tracked Fleet", desc: "Real-time visibility on every shipment." },
-    { title: "SADC Coverage", desc: "Zimbabwe, Zambia, Mozambique, South Africa, and Botswana." },
-    { title: "Licensed & Insured", desc: "Full cargo insurance and customs clearing licences." }
+    { title: 'Tracked Deliveries', desc: 'Every parcel tracked in real-time via GPS. Know exactly where your shipment is.' },
+    { title: 'Competitive Rates', desc: 'Transparent pricing with no hidden fees. Get an instant quote on our website.' },
+    { title: 'Professional Team', desc: 'Trained, uniformed couriers who treat your packages with care and respect.' },
+    { title: 'Flexible Scheduling', desc: 'Same-day, next-day, or scheduled deliveries to fit your business needs.' },
   ];
   return (
-    <section ref={ref} className="bg-navy-900 py-24 sm:py-32 lg:py-40 overflow-hidden">
+    <section ref={ref} className="bg-earth-50 py-24 sm:py-32 lg:py-40 overflow-hidden">
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
-        <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
-          <motion.div initial={{ opacity: 0, x: -40 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.9 }} className="relative">
-            <img src="https://images.unsplash.com/photo-1570480548578-3d49ca005e67?w=800&q=80" alt="Legit Carriers" className="w-full aspect-[4/5] object-cover object-center" loading="lazy" />
-            <div className="absolute -top-3 -left-3 w-20 h-20 border-t-2 border-l-2 border-gold-500/40" />
-            <div className="absolute -bottom-3 -right-3 w-20 h-20 border-b-2 border-r-2 border-gold-500/40" />
-          </motion.div>
-          <motion.div initial={{ opacity: 0, x: 40 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.9, delay: 0.15 }}>
-            <div className="w-12 h-[2px] bg-gold-500 mb-6" />
-            <p className="text-gold-500/60 text-xs uppercase tracking-[0.3em] mb-3" style={{ fontFamily: 'var(--font-sans)' }}>The Difference</p>
-            <h2 className="font-heading text-white leading-[0.95] italic mb-12" style={{ fontSize: 'clamp(2rem, 4.5vw, 3rem)' }}>Why Choose <span className="text-gold-500">Legit</span></h2>
-            <div className="space-y-8">
-              {points.map((point, i) => (
-                <motion.div key={point.title} initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.3 + i * 0.1 }} className="flex gap-5">
-                  <div className="shrink-0 mt-1"><div className="w-8 h-8 border border-gold-500/30 flex items-center justify-center bg-gold-500/5"><CheckCircle size={16} weight="fill" className="text-gold-500" /></div></div>
-                  <div><h4 className="font-heading text-white text-base sm:text-lg italic tracking-wide mb-1">{point.title}</h4><p className="text-white/40 text-sm leading-relaxed" style={{ fontFamily: 'var(--font-sans)' }}>{point.desc}</p></div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8 }} className="text-center mb-14 sm:mb-20">
+          <div className="w-12 h-[3px] bg-blue-600 mx-auto mb-6" />
+          <h2 className="font-heading text-navy-900 leading-[0.95]" style={{ fontSize: 'clamp(2rem, 4.5vw, 3rem)' }}>
+            Why Choose <span className="text-blue-600">Roadrunner</span>
+          </h2>
+        </motion.div>
+        <div className="grid sm:grid-cols-2 gap-6">
+          {points.map((point, i) => (
+            <motion.div key={point.title} initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.1 * i }}
+              className="flex gap-5 bg-white p-8 border border-navy-900/5 hover:border-blue-600/20 transition-colors duration-500">
+              <div className="shrink-0 mt-1">
+                <div className="w-10 h-10 bg-blue-600 flex items-center justify-center">
+                  <CheckCircle size={20} weight="fill" className="text-white" />
+                </div>
+              </div>
+              <div>
+                <h4 className="font-heading text-navy-900 text-lg mb-2">{point.title}</h4>
+                <p className="text-navy-700/40 text-sm leading-relaxed" style={{ fontFamily: 'var(--font-sans)' }}>{point.desc}</p>
+              </div>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>
   );
 }
 
+
+/* ================================================================
+   7. TESTIMONIALS — dark section
+   ================================================================ */
 function TestimonialsSection() {
   const [active, setActive] = useState(0);
   const { homeTestimonials } = siteData;
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
-  const next = useCallback(() => setActive(p => (p + 1) % homeTestimonials.length), [homeTestimonials.length]);
-  const prev = useCallback(() => setActive(p => (p - 1 + homeTestimonials.length) % homeTestimonials.length), [homeTestimonials.length]);
+  const next = useCallback(() => setActive((p) => (p + 1) % homeTestimonials.length), [homeTestimonials.length]);
+  const prev = useCallback(() => setActive((p) => (p - 1 + homeTestimonials.length) % homeTestimonials.length), [homeTestimonials.length]);
   useEffect(() => { const t = setInterval(next, 7000); return () => clearInterval(t); }, [next]);
   const t = homeTestimonials[active];
   return (
@@ -335,23 +366,27 @@ function TestimonialsSection() {
       <NoiseTexture opacity={0.02} />
       <div className="relative z-10 max-w-4xl mx-auto px-5 sm:px-8 lg:px-12">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.8 }} className="text-center">
-          <Quotes size={48} weight="fill" className="text-gold-500/15 mx-auto mb-8" />
+          <Quotes size={48} weight="fill" className="text-blue-500/15 mx-auto mb-8" />
           <AnimatePresence mode="wait">
             <motion.div key={active} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.6 }}>
-              <blockquote className="text-white text-lg sm:text-xl lg:text-2xl leading-relaxed font-heading italic mb-10">&ldquo;{t.text}&rdquo;</blockquote>
+              <blockquote className="text-white text-lg sm:text-xl lg:text-2xl leading-relaxed font-heading mb-10">&ldquo;{t.text}&rdquo;</blockquote>
               <div className="flex flex-col items-center gap-3">
-                {t.avatar && <img src={t.avatar} alt={t.name} className="w-12 h-12 object-cover object-center border-2 border-gold-500/30" loading="lazy" />}
-                <div className="w-8 h-[2px] bg-gold-500" />
+                {t.avatar && <img src={t.avatar} alt={t.name} className="w-12 h-12 rounded-full object-cover border-2 border-blue-500/30" loading="lazy" />}
+                <div className="w-8 h-[2px] bg-blue-500" />
                 <div className="text-white text-sm uppercase tracking-[0.15em] font-semibold" style={{ fontFamily: 'var(--font-sans)' }}>{t.name}</div>
                 <div className="text-white/40 text-xs uppercase tracking-[0.15em]" style={{ fontFamily: 'var(--font-sans)' }}>{t.role}</div>
-                <div className="flex items-center gap-0.5 mt-1">{[...Array(t.rating)].map((_, i) => <Star key={i} size={12} weight="fill" className="text-gold-500" />)}</div>
+                <div className="flex items-center gap-0.5 mt-1">
+                  {[...Array(t.rating)].map((_, i) => <Star key={i} size={12} weight="fill" className="text-blue-500" />)}
+                </div>
               </div>
             </motion.div>
           </AnimatePresence>
           <div className="flex items-center justify-center gap-6 mt-12">
-            <button onClick={prev} className="w-10 h-10 border border-white/10 flex items-center justify-center text-white/30 hover:text-gold-500 hover:border-gold-500/30 transition-colors duration-300" aria-label="Previous"><CaretLeft size={16} /></button>
-            <div className="flex gap-2">{homeTestimonials.map((_, i) => (<button key={i} onClick={() => setActive(i)} className={`h-[2px] transition-all duration-500 ${i === active ? 'w-10 bg-gold-500' : 'w-3 bg-white/10 hover:bg-white/25'}`} aria-label={`Testimonial ${i + 1}`} />))}</div>
-            <button onClick={next} className="w-10 h-10 border border-white/10 flex items-center justify-center text-white/30 hover:text-gold-500 hover:border-gold-500/30 transition-colors duration-300" aria-label="Next"><CaretRight size={16} /></button>
+            <button onClick={prev} className="w-10 h-10 border border-white/10 flex items-center justify-center text-white/30 hover:text-blue-500 hover:border-blue-500/30 transition-colors" aria-label="Previous"><CaretLeft size={16} /></button>
+            <div className="flex gap-2">
+              {homeTestimonials.map((_, i) => <button key={i} onClick={() => setActive(i)} className={`h-[2px] transition-all duration-500 ${i === active ? 'w-10 bg-blue-500' : 'w-3 bg-white/10'}`} aria-label={`Testimonial ${i + 1}`} />)}
+            </div>
+            <button onClick={next} className="w-10 h-10 border border-white/10 flex items-center justify-center text-white/30 hover:text-blue-500 hover:border-blue-500/30 transition-colors" aria-label="Next"><CaretRight size={16} /></button>
           </div>
         </motion.div>
       </div>
@@ -359,6 +394,10 @@ function TestimonialsSection() {
   );
 }
 
+
+/* ================================================================
+   8. CTA — Full bleed image
+   ================================================================ */
 function CTASection() {
   const { business, homeCta } = siteData;
   const ref = useRef(null);
@@ -367,30 +406,26 @@ function CTASection() {
   return (
     <section ref={ref} className="relative py-28 sm:py-36 lg:py-48 overflow-hidden">
       <motion.div className="absolute inset-0" style={{ y: bgY }}>
-        <img src={homeCta.backgroundImage} alt="Legit Carriers" className="w-full h-[130%] object-cover object-center" loading="lazy" />
+        <img src={homeCta?.backgroundImage || 'https://images.unsplash.com/photo-1570480548578-3d49ca005e67?w=1920&q=85'} alt="CTA" className="w-full h-[130%] object-cover object-center" loading="lazy" />
         <div className="absolute inset-0 bg-navy-950/70" />
       </motion.div>
       <NoiseTexture opacity={0.03} />
       <div className="relative z-20 max-w-5xl mx-auto px-5 sm:px-8 lg:px-12 text-center">
         <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 1 }}>
-          <div className="w-16 h-[2px] bg-gold-500 mx-auto mb-8" />
-          <h2 className="font-heading text-white leading-[0.92] italic mb-8" style={{ fontSize: 'clamp(2.5rem, 8vw, 6rem)' }}>YOUR CARGO.<br /><span className="text-gold-500">OUR COMMITMENT.</span></h2>
-          <p className="text-white/50 text-sm sm:text-base lg:text-lg max-w-lg mx-auto mb-12 leading-relaxed" style={{ fontFamily: 'var(--font-sans)' }}>{homeCta.subtitle}</p>
+          <div className="w-16 h-[3px] bg-blue-500 mx-auto mb-8" />
+          <h2 className="font-heading text-white leading-[0.92] mb-8" style={{ fontSize: 'clamp(2.5rem, 8vw, 6rem)' }}>
+            READY TO<br /><span className="text-blue-500">RUN?</span>
+          </h2>
+          <p className="text-white/50 text-sm sm:text-base lg:text-lg max-w-lg mx-auto mb-12 leading-relaxed" style={{ fontFamily: 'var(--font-sans)' }}>
+            {homeCta?.subtitle || 'Request a pickup now and experience Harare\'s fastest courier service.'}
+          </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link to="/contact" className="group relative inline-flex items-center gap-3 bg-gold-500 text-navy-950 px-8 py-4 text-sm uppercase tracking-[0.15em] font-semibold transition-all duration-500 hover:bg-gold-400 hover:shadow-xl hover:shadow-gold-500/25" style={{ fontFamily: 'var(--font-sans)' }}>
-              {homeCta.ctaPrimary} <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+            <Link to="/contact" className="group inline-flex items-center gap-3 bg-blue-600 text-white px-8 py-4 text-sm uppercase tracking-[0.15em] font-semibold transition-all duration-500 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-600/25" style={{ fontFamily: 'var(--font-sans)' }}>
+              {homeCta?.ctaPrimary || 'Get a Quote'} <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
             </Link>
-            <a href={`https://wa.me/${business.whatsappNumber}?text=${encodeURIComponent(homeCta.whatsappText)}`} target="_blank" rel="noopener noreferrer"
-              className="group inline-flex items-center gap-3 border border-emerald-500/40 text-emerald-400 px-8 py-4 text-sm uppercase tracking-[0.15em] font-semibold transition-all duration-500 hover:bg-emerald-500/10 hover:border-emerald-500/60" style={{ fontFamily: 'var(--font-sans)' }}>
-              <WhatsappLogo size={20} weight="fill" /> {homeCta.ctaSecondary}
+            <a href={`https://wa.me/${business.whatsappNumber}`} target="_blank" rel="noopener noreferrer" className="group inline-flex items-center gap-3 border border-white/30 text-white px-8 py-4 text-sm uppercase tracking-[0.15em] font-semibold transition-all duration-500 hover:bg-white/10" style={{ fontFamily: 'var(--font-sans)' }}>
+              <WhatsappLogo size={20} weight="fill" /> {homeCta?.ctaSecondary || 'WhatsApp Us'}
             </a>
-          </div>
-          <div className="mt-16 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-center gap-6 text-xs text-white/25 uppercase tracking-[0.15em]" style={{ fontFamily: 'var(--font-sans)' }}>
-            <a href={`tel:${business.phoneRaw}`} className="flex items-center gap-2 hover:text-gold-500 transition-colors"><Phone size={14} /> {business.phone}</a>
-            <span className="hidden sm:inline text-white/10">|</span>
-            <a href={`mailto:${business.email}`} className="hover:text-gold-500 transition-colors">{business.email}</a>
-            <span className="hidden sm:inline text-white/10">|</span>
-            <span className="flex items-center gap-2"><MapPin size={14} /> Harare, Zimbabwe</span>
           </div>
         </motion.div>
       </div>
@@ -398,13 +433,13 @@ function CTASection() {
   );
 }
 
-function Home() {
+
+export default function Home() {
   return (
     <PageTransition>
       <HeroSection />
-      <MarqueeTicker />
+      <ProcessSteps />
       <ServicesGrid />
-      <PortfolioGallery />
       <StatsBand />
       <AboutSection />
       <WhyChooseUs />
@@ -413,5 +448,3 @@ function Home() {
     </PageTransition>
   );
 }
-
-export default Home;
